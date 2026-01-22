@@ -1,20 +1,23 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { authService } from '../services/authService';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children: React.ReactElement; // or React.ReactNode
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const location = useLocation();
-  
-  if (!authService.isAuthenticated()) {
-    // Redirect to login page with return path
-    return <Navigate to="/login" state={{ from: location }} replace />;
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>; // Or a spinner
   }
-  
-  return <>{children}</>;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 export default ProtectedRoute;

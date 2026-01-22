@@ -1,104 +1,44 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import { authService } from '../services/authService';
+import { useAuth } from '../hooks/useAuth';
+import ClientPetBrowser from './ClientPetBrowser';
+import { Link } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
-  const userRole = authService.getUserRole();
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      navigate('/login');
-    } catch (error) {
-      console.error('Error en logout:', error);
-      navigate('/login');
-    }
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <>
-      <Header isAuthenticated={true} />
-      <div className="dashboard-container">
-        <div className="dashboard-header">
-          <h1 className="dashboard-title">
-            ¡Bienvenido a UIO Paws!
-          </h1>
-          <p className="dashboard-subtitle">
-            Rol: {userRole} | Gracias por ser parte de nuestra comunidad
-          </p>
+    <div className="dashboard-container animate-fade-in">
+      {user ? (
+        <div>
+          <div className="welcome-banner">
+            <h1>Hola, {user.first_name}</h1>
+            <p>Bienvenido de nuevo a UIO Paws. Tu rol es: {user.role}</p>
+            <div style={{ marginTop: '1rem' }}>
+              <button onClick={logout} className="btn-secondary">Cerrar Sesión</button>
+            </div>
+          </div>
+
+          {user.role === 'admin' && (
+            <div className="admin-panel shadow-sm" style={{ marginBottom: '2rem' }}>
+              <h3 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Panel de Administración</h3>
+              <div className="flex gap-4">
+                <Link to="/admin/pets" className="bg-brand text-white px-5 py-2 rounded-lg hover:bg-brand-hover transition-colors shadow-md font-medium">Gestionar Mascotas</Link>
+                <Link to="/admin/requests" className="bg-white text-brand border border-brand px-5 py-2 rounded-lg hover:bg-brand-light hover:text-white transition-colors shadow-md font-medium">Gestionar Solicitudes</Link>
+              </div>
+            </div>
+          )}
+
+          <h2 style={{ marginTop: '1rem', marginBottom: '1.5rem', fontSize: '1.5rem', fontWeight: 'bold' }}>
+            Adopta un compañero
+          </h2>
+          <ClientPetBrowser />
         </div>
-
-        <div className="dashboard-content">
-          <div className="dashboard-card">
-            <h2 className="card-title">🐾 Ver Animales</h2>
-            <p className="card-description">
-              Explora nuestros animales disponibles para adopción. Cada uno de ellos 
-              está esperando un hogar lleno de amor y cuidado.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/animals')}>
-              Ver Animales
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <h2 className="card-title">🎁 Qué Donar</h2>
-            <p className="card-description">
-              Tu ayuda es fundamental. Conoce qué artículos necesitas para cuidar 
-              de nuestros amigos peludos y cómo puedes contribuir.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/donate')}>
-              Ver Donaciones
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <h2 className="card-title">🤝 Sé Voluntario</h2>
-            <p className="card-description">
-              Únete a nuestro equipo de voluntarios y marca la diferencia en la 
-              vida de muchos animales que necesitan tu ayuda.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/volunteer')}>
-              Ser Voluntario
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <h2 className="card-title">👤 Mi Perfil</h2>
-            <p className="card-description">
-              Gestiona tu información personal, actualiza tus datos y revisa 
-              el estado de tus solicitudes de adopción y voluntariado.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/profile')}>
-              Ver Perfil
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <h2 className="card-title">📋 Mis Solicitudes</h2>
-            <p className="card-description">
-              Revisa el estado de tus aplicaciones de adopción, voluntariado 
-              y donaciones. Mantente informado sobre el progreso.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/my-applications')}>
-              Ver Solicitudes
-            </button>
-          </div>
-
-          <div className="dashboard-card">
-            <h2 className="card-title">📞 Contactos de Emergencia</h2>
-            <p className="card-description">
-              Gestiona tus contactos de emergencia para que podamos comunicarnos 
-              rápidamente en caso de ser necesario.
-            </p>
-            <button className="btn btn-primary" onClick={() => navigate('/emergency-contacts')}>
-              Gestionar Contactos
-            </button>
-          </div>
+      ) : (
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          <p>Cargando información...</p>
         </div>
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

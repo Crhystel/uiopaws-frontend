@@ -35,7 +35,8 @@ export interface User {
   phone: string;
   profile_photo_url: string;
   is_active: boolean;
-  roles: Role[];
+  role: string; // Added to match backend
+  roles?: Role[]; // Made optional
 }
 
 export interface Role {
@@ -55,52 +56,52 @@ export const authService = {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       console.log('Attempting login with:', credentials.email);
-      
+
       // Enviar login con formato JSON según tu API Laravel
       const response = await api.post('/login', {
         email: credentials.email,
         password: credentials.password
       });
-      
+
       const { access_token, token_type, user_role } = response.data;
-      
+
       console.log('Login successful, token received:', access_token);
-      
+
       // Guardar token y rol en localStorage
       localStorage.setItem('access_token', access_token);
       localStorage.setItem('user_role', user_role);
-      
+
       return response.data;
     } catch (error: any) {
       console.error('Login error details:', error);
-      
+
       // Manejar errores específicos de tu API Laravel
       if (error.response?.status === 404) {
-        throw { 
+        throw {
           message: 'Usuario no encontrado en la base de datos.',
           error: error.response.data.error
         };
       }
-      
+
       if (error.response?.status === 422) {
-        throw { 
+        throw {
           message: 'Las credenciales son incorrectas.',
           errors: error.response.data.errors
         };
       }
-      
+
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw { 
-          message: 'No se puede conectar al servidor. Verifica que el backend esté corriendo en http://127.0.0.1:8000' 
+        throw {
+          message: 'No se puede conectar al servidor. Verifica que el backend esté corriendo en http://127.0.0.1:8000'
         };
       }
-      
+
       if (error.code === 'ECONNABORTED') {
-        throw { 
-          message: 'Tiempo de espera agotado. El servidor tarda demasiado en responder.' 
+        throw {
+          message: 'Tiempo de espera agotado. El servidor tarda demasiado en responder.'
         };
       }
-      
+
       throw error.response?.data || { message: 'Error en el login' };
     }
   },
@@ -114,19 +115,19 @@ export const authService = {
       return response.data;
     } catch (error: any) {
       console.error('Registration error details:', error);
-      
+
       if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        throw { 
-          message: 'No se puede conectar al servidor. Verifica que el backend esté corriendo en http://127.0.0.1:8000' 
+        throw {
+          message: 'No se puede conectar al servidor. Verifica que el backend esté corriendo en http://127.0.0.1:8000'
         };
       }
-      
+
       if (error.code === 'ECONNABORTED') {
-        throw { 
-          message: 'Tiempo de espera agotado. El servidor tarda demasiado en responder.' 
+        throw {
+          message: 'Tiempo de espera agotado. El servidor tarda demasiado en responder.'
         };
       }
-      
+
       throw error.response?.data || { message: 'Error en el registro' };
     }
   },
